@@ -44,7 +44,7 @@ void setup() {
   grid = new Grid(cellSize);
   
   // floating vertical rope
-  float chainSize = 25.0;
+  /*float chainSize = 25.0;
   for(int i=1; i<6; i++) {
     int curX = i*(width/6);
     
@@ -60,7 +60,7 @@ void setup() {
       
       last = curObj;
     }
-  }
+  }*/
   
   // net horizontal rope
   VerletObject last = null;
@@ -77,6 +77,41 @@ void setup() {
   }
   
   if(last != null) last.disablePhysics = true;
+  
+  // floating cloth
+  int clothSize = 15;
+  int chainLength = int(chainBallRadius*3);
+  VerletObject[] lastChain = new VerletObject[clothSize];
+  for(int i=0; i<clothSize; i++) {
+    for(int j=0; j<clothSize; j++) {
+      VerletObject curObj = createObject(new PVector(100 + (i*chainLength), 100 + (j*chainLength)), chainBallRadius, color(255, 100, 100));
+      
+      if(j==0 && lastChain[j] == null) { // top left object
+        curObj.disablePhysics = true;
+        lastChain[j] = curObj;
+        continue;
+      }
+      
+      if(lastChain[j] == null) { // first row, not top left
+        createChain(lastChain[j-1], curObj, chainLength);
+        lastChain[j] = curObj;
+        continue;
+      }
+      
+      if(j==0) { // top column, not first row
+        createChain(lastChain[j], curObj, chainLength);
+        lastChain[j] = curObj;
+        continue;
+      }
+      
+      // not first row
+      createChain(lastChain[j-1], curObj, chainLength);
+      createChain(lastChain[j], curObj, chainLength);
+      lastChain[j] = curObj;
+    }
+  }
+  
+  lastChain[0].disablePhysics = true;
 }
 
 // moves all of the objects to their correct positions in the chains
@@ -118,8 +153,8 @@ void update() {
   if(millis() > numSpawned * spawnRate) { // spawn new objects every so often
     float colorMultiplier = (sin(millis() * 0.001) + 1) / 2;
     
-    VerletObject obj1 = createObject(new PVector(width * random(1), height * random(0.25)), ballRadius, color(colorMultiplier * 255));
-    obj1.setVelocity(new PVector(random(2000) - 1000, random(2000) - 1000));
+    VerletObject obj1 = createObject(new PVector(width * (random(0.5) + 0.5), height * random(0.5)), ballRadius, color(colorMultiplier * 255));
+    obj1.setVelocity(new PVector(random(3000) - 3000, random(100) - 50));
     
     numSpawned++;
   }
