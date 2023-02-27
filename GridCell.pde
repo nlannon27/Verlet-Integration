@@ -10,6 +10,7 @@ class GridCell {
     this.gridY = gridY;
   }
   
+  // handles collisions between objects in each cell
   void checkCollisions(GridCell otherCell) {
     for(VerletObject obj : this.objects) {
       for(VerletObject otherObj : otherCell.objects) {
@@ -18,22 +19,25 @@ class GridCell {
     }
   }
   
+  // checks neighboring cells for collisions
   void checkNeighbors() {
     for(int x=-1; x<=1; x++) {
       for(int y=-1; y<=1; y++) {
         int dx = gridX + x;
         int dy = gridY + y;
         
+        // if the neighboring cell is outside of the grid (off screen) continue
         if(dx < 0 || dx > grid.gridWidth-1 || dy < 0 || dy > grid.gridHeight-1) continue;
         
+        // check collisions with neighbor
         GridCell neighbor = parentGrid.getCell(dx, dy);
-        
         checkCollisions(neighbor);
       }
     }
   }
   
-  void cullExcessObjects() { // Removes objects that have left the grid
+  // Removes objects that have left the grid
+  void cullExcessObjects() { 
     for(int i=0; i<this.objects.size(); i++) {
       VerletObject obj = this.objects.get(i);
       
@@ -42,7 +46,8 @@ class GridCell {
       }
     }
   }
-
+  
+  // add an object to the grid
   int addObject(VerletObject obj) {
     objects.add(obj);
     
